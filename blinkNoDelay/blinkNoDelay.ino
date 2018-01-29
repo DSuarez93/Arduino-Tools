@@ -10,21 +10,26 @@ volatile bool ledSTATE = 0;
 unsigned long previousMillis = 0;
 unsigned long currentMillis;
 const long interval = 250;
+
 void setup() {
 	pinMode(ledPin, OUTPUT);
 	currentMillis = 0;
 }
 
-void sett() {
+void sett(void doing()) {
 	if (currentMillis - previousMillis >= interval) {
 		previousMillis = CurrentMillis;
-		ledState = !ledState;
-		digitalWrite(ledPin, ledState);
+		doing();
 	}
+}
+
+void action() {
+	ledState = !ledState;
+	digitalWrite(ledPin, ledState);
+	//insert other code
 }
 
 void loop() {
 	currentMillis = millis();
-	sett();
-	//insert other code
+	sett(action());
 }
