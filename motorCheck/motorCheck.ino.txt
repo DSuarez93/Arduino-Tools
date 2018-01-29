@@ -1,0 +1,13 @@
+int motor1Speed = 255; //according to PWM, 2^8-1 is max speed in one direction
+int motor1Speed = 255;
+int motorPin1 = 9;
+int motorPin2 = 10;
+
+void setup() {
+}
+
+void loop() {
+	analogWrite(motorPin1, motor1Speed);
+	analogWrite(motorPin2, motor2Speed);
+	delay(250);
+}

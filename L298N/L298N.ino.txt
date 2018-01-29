@@ -1,0 +1,23 @@
+/*
+	http://www.youtube.com/watch?v=kv-9mxVaVzE	
+	PWM sets speed of a motor.
+	Next two pins control direction.
+	PWM needs to be high enough to spin the motor, but introduce a capacitor in order to clean up square pulses.
+*/
+
+int sPMW = 180;			//control the speed of the motor
+const int pinPWM = 9;		
+const int direction1 = 8;
+const int direction2 = 7;
+bool switcher = 0;		//dictates a direction
+
+void setup() {
+	analogWrite(pinPWM, sPMW);	
+}
+
+void loop() {
+	digitalWrite(direction1, switcher);
+	switcher = !switcher;
+	digitalWrite(direction2, switcher);
+	delay(500);
+}
