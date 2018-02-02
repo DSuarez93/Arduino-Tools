@@ -19,6 +19,7 @@ void setup() {
 void sett() {
 	if (currentMillis - previousMillis >= interval) {
 		previousMillis = currentMillis;
+		action();
 	}
 }
 
@@ -31,5 +32,4 @@ void action() {
 void loop() {
 	currentMillis = millis();
 	sett();
-	action();
 }
