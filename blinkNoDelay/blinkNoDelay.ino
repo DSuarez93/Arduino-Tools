@@ -6,7 +6,7 @@
 */
 
 const int ledPin = LED_BUILTIN;
-volatile bool ledSTATE = 0;
+volatile bool ledState = 0;
 unsigned long previousMillis = 0;
 unsigned long currentMillis;
 const long interval = 250;
@@ -16,10 +16,9 @@ void setup() {
 	currentMillis = 0;
 }
 
-void sett(void doing()) {
+void sett() {
 	if (currentMillis - previousMillis >= interval) {
-		previousMillis = CurrentMillis;
-		doing();
+		previousMillis = currentMillis;
 	}
 }
 
@@ -31,5 +30,6 @@ void action() {
 
 void loop() {
 	currentMillis = millis();
-	sett(action());
+	sett();
+	action();
 }
