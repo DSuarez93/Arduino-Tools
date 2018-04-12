@@ -1,3 +1,10 @@
+/*
+  Press Triangle or Circle to activate rumple.
+  Disconnect the controller to shut off the motor.
+  Uno (2) to Mega(9)
+  Connect grounds of both microcontrollers together.
+*/
+
 #include <PS3BT.h>
 #include <usbhub.h>
 #include <SPI.h>
@@ -5,15 +12,53 @@
 USB Usb;
 BTD Btd(&Usb);
 PS3BT PS3(&Btd, 0x00, 0x15, 0x83, 0x3D, 0x0A, 0x57);
-bool switching, sw1, sw2, sw3;
-const byte ledPin =   3;
-const byte testPin =  4;       //stop
-const byte move =     5;       //forward
-const byte ootw =     6;       //reverse
+bool switching;
+const int sendPin =  2;       //connect to MEGA
+const int tens =   3;
+const int hundreds = 4;
+            //            (2, 4, 7)
+int statuo; //0: stop     (0, 0, 0)
+            //1: right    (0, 0, 1)
+            //2: left     (0, 1, 0)
+            //3: forward  (0, 1, 1)
+            //4: backward (1, 0, 0)
+
+void sendOut(int stat) {
+  switch(stat) {
+    case 3:   //forward
+      digitalWrite(hundreds, LOW); 
+      digitalWrite(tens,    HIGH); 
+      digitalWrite(sendPin, HIGH);
+      break;
+    case 2:   //left
+      digitalWrite(hundreds, LOW); 
+      digitalWrite(tens,     HIGH); 
+      digitalWrite(sendPin,  LOW);
+      break;
+    case 1:   //right
+      digitalWrite(hundreds, LOW); 
+      digitalWrite(tens,     LOW); 
+      digitalWrite(sendPin,  HIGH);
+      break;
+    case 4:   //backward
+      digitalWrite(hundreds, HIGH); 
+      digitalWrite(tens,     LOW); 
+      digitalWrite(sendPin,  LOW);
+      break;      
+    default: 
+      digitalWrite(hundreds, LOW); 
+      digitalWrite(tens, LOW); 
+      digitalWrite(sendPin, LOW);
+  }
+}
 
 void setup() {
   Serial.begin(115200);
-  switching = 1; sw1 = 1; sw2 = 1; sw3 = 1;
+  switching = 1; statu = 0;
+  pinMode(ledPin, OUTPUT);
+  pinMode(sendPin, OUTPUT);
+  pinMode(tens, OUTPUT);
+  pinMode(hundreds, OUTPUT);
   #if !defined(__MIPSEL__)
     while (!Serial);
   #endif
@@ -24,7 +69,6 @@ void setup() {
       delay(500);
     }
   }
-  pinMode(ledPin, OUTPUT);
   for (int i = 0; i<6; i++) {
     digitalWrite(ledPin, switching);
     switching = !switching;
@@ -32,20 +76,12 @@ void setup() {
   }
 }
 
-void setHigh() {
-//digitalWrite(ledPin, HIGH);
-  digitalWrite(testPin, HIGH);
-  digitalWrite(move, HIGH);
-  digitalWrite(ootw, HIGH);
-  switching = 1; sw1=1; sw2=1; sw3 = 1;  
-}
-
 void loop() {
   Usb.Task();
-  setHigh();
   if (PS3.PS3Connected) {
     if (PS3.getButtonPress(PS) && PS3.getButtonPress(L2) && PS3.getButtonPress(R1)) {
-      PS3.disconnect(); digitalWrite(testPin, LOW);
+      PS3.disconnect();
+      //brake if breaks
     }
     if (PS3.getButtonClick(UP)) {
           PS3.setLedOff();
@@ -64,19 +100,20 @@ void loop() {
           PS3.setLedOn(LED3);
     }
     if (PS3.getButtonClick(SQUARE)) {
-        switching = !switching;
+        statuo = 2;
     }
     if (PS3.getButtonClick(TRIANGLE)) {
-        sw1 = !sw1;
+        statuo = 1;
     }
     if (PS3.getButtonClick(CROSS)) {
         PS3.setRumbleOn(RumbleLow);
+        statuo = 3;
     }
     if (PS3.getButtonClick(CIRCLE)) {
         PS3.setRumbleOn(RumbleHigh);
+        statuo = 4;
     }
     if (PS3.getButtonClick(R1)) {
-        sw2 = !sw2;
     }
     if (PS3.getButtonClick(L1)) {
     }
@@ -88,8 +125,6 @@ void loop() {
     }    
     if (PS3.getButtonClick(R2)) {
     }    
-  }  else digitalWrite(testPin, LOW);  //end PS3 Connect
-  digitalWrite(ledPin, switching);
-  digitalWrite(move, sw1);
-  digitalWrite(ootw, sw2);
+  }  else statuo = 0;  //end PS3 Connect
+  sendOut(statuo);
 }
